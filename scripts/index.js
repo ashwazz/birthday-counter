@@ -49,9 +49,10 @@ x = setInterval(function() {
     hh = h / 2,
     opts = {
       strings: ['HAPPY', 'BIRTHDAY!', config.name],
-      charSize: 30,
-      charSpacing: 35,
-      lineHeight: 40,
+      charSize: Math.min(30, window.innerWidth / 20),
+      charSpacing: Math.min(35, window.innerWidth / 15),
+      lineHeight: Math.min(40, window.innerHeight / 12),
+      verticalLayout: true,
 
       cx: w / 2,
       cy: h / 2,
@@ -89,9 +90,8 @@ x = setInterval(function() {
       balloonAddedRadian: -1
     },
     calc = {
-      totalWidth:
-        opts.charSpacing *
-        Math.max(opts.strings[0].length, opts.strings[1].length)
+      totalWidth: opts.charSpacing * Math.max(...opts.strings.map(str => str.length)),
+      totalHeight: opts.lineHeight * opts.strings.length
     },
     Tau = Math.PI * 2,
     TauQuarter = Tau / 4,
@@ -109,7 +109,7 @@ x = setInterval(function() {
 
     this.fireworkDy = this.y - hh;
 
-    let hue = (x / calc.totalWidth) * 360;
+    let hue = (y / calc.totalHeight) * 360;
 
     this.color = 'hsl(hue,80%,50%)'.replace('hue', hue);
     this.lightAlphaColor = 'hsla(hue,80%,light%,alp)'.replace('hue', hue);
@@ -358,11 +358,22 @@ x = setInterval(function() {
             // Determine which message to show next
             if (opts.strings[0] === 'HAPPY') {
               // After birthday message, show first custom message
-              opts.strings = ["My babyyy you're the best of the best"];
+              opts.strings = [
+                "My babyyy",
+                "you're the",
+                "best of the best"
+              ];
               initializeLetters();
-            } else if (opts.strings[0] === "My babyyy you're the best of the best") {
+            } else if (opts.strings[0] === "My babyyy") {
               // After first message, show second message
-              opts.strings = ["Iloveyou more than anything in this world", "so here is a small gift from mee"];
+              opts.strings = [
+                "Iloveyou more",
+                "than anything",
+                "in this world",
+                "so here is a",
+                "small gift",
+                "from mee"
+              ];
               initializeLetters();
             } else {
               // After final message, show gift box
@@ -487,17 +498,18 @@ x = setInterval(function() {
 
   // Add new function to initialize letters
   function initializeLetters() {
+    letters = []; // Clear existing letters
+    let verticalOffset = -((opts.strings.length - 1) * opts.lineHeight) / 2;
+    
     for (let i = 0; i < opts.strings.length; ++i) {
+      let horizontalOffset = -(opts.strings[i].length * opts.charSpacing) / 2;
+      
       for (let j = 0; j < opts.strings[i].length; ++j) {
         letters.push(
           new Letter(
             opts.strings[i][j],
-            j * opts.charSpacing +
-              opts.charSpacing / 2 -
-              (opts.strings[i].length * opts.charSize) / 2,
-            i * opts.lineHeight +
-              opts.lineHeight / 2 -
-              (opts.strings.length * opts.lineHeight) / 2
+            horizontalOffset + j * opts.charSpacing,
+            verticalOffset + i * opts.lineHeight
           )
         );
       }
@@ -514,7 +526,18 @@ x = setInterval(function() {
     hw = w / 2;
     hh = h / 2;
 
+    // Update responsive values
+    opts.charSize = Math.min(30, window.innerWidth / 20);
+    opts.charSpacing = Math.min(35, window.innerWidth / 15);
+    opts.lineHeight = Math.min(40, window.innerHeight / 12);
+
     ctx.font = opts.charSize + 'px Verdana';
+    
+    // Reinitialize letters with new sizes
+    if (letters.length > 0) {
+      let currentStrings = opts.strings;
+      initializeLetters();
+    }
   });
 
   if (distance > 0) {
