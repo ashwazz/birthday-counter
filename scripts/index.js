@@ -4,8 +4,8 @@ const giftbox = document.getElementById('merrywrap');
 const canvasC = document.getElementById('c');
 
 const config = {
-  birthdate: 'Jan 29, 2020',
-  name: 'Darlene'
+  birthdate: 'April 23, 2025',
+  name: 'Tejaswi'
 };
 
 function hideEverything() {
@@ -340,8 +340,71 @@ x = setInterval(function() {
           this.cy + this.dy + this.size
         );
 
-        if (this.cy + this.size < -hh || this.cx < -hw || this.cy > hw)
+        if (this.cy + this.size < -hh || this.cx < -hw || this.cy > hw) {
           this.phase = 'done';
+          // Check if all letters of current message are done
+          let allDone = true;
+          for (let l = 0; l < letters.length; ++l) {
+            if (letters[l].phase !== 'done') {
+              allDone = false;
+              break;
+            }
+          }
+          
+          if (allDone) {
+            // Clear current letters
+            letters.length = 0;
+            
+            // Determine which message to show next
+            if (opts.strings[0] === 'HAPPY') {
+              // After birthday message, show first custom message
+              opts.strings = ["My babyyy you're the best of the best"];
+              initializeLetters();
+            } else if (opts.strings[0] === "My babyyy you're the best of the best") {
+              // After first message, show second message
+              opts.strings = ["Iloveyou more than anything in this world", "so here is a small gift from mee"];
+              initializeLetters();
+            } else {
+              // After final message, show gift box
+              setTimeout(() => {
+                // Hide canvas
+                ctx.clearRect(-hw, -hh, w, h);
+                canvasC.style.display = 'none';
+                
+                // Show the final gift box
+                const finalGiftbox = document.getElementById('merrywrap');
+                const finalBox = finalGiftbox.getElementsByClassName('giftbox')[0];
+                
+                // Reset the gift box state
+                finalGiftbox.className = 'merrywrap';
+                finalBox.removeEventListener('click', openBox, false);
+                finalBox.removeEventListener('click', showfireworks, false);
+                
+                // Show the gift box
+                finalGiftbox.style.display = 'initial';
+                
+                // Add new click handler for website redirect
+                finalBox.addEventListener('click', function giftRedirect() {
+                  // Add opening animation
+                  stepClass(1);
+                  setTimeout(() => {
+                    stepClass(2);
+                    setTimeout(() => {
+                      stepClass(3);
+                      setTimeout(() => {
+                        stepClass(4);
+                        // Redirect after the animation
+                        setTimeout(() => {
+                          window.location.href = 'https://www.tejaswivel.in';
+                        }, 1000);
+                      }, 1000);
+                    }, 1000);
+                  }, 1000);
+                }, false);
+              }, 2000);
+            }
+          }
+        }
       }
     }
   };
@@ -422,21 +485,27 @@ x = setInterval(function() {
     if (done) for (let l = 0; l < letters.length; ++l) letters[l].reset();
   }
 
-  for (let i = 0; i < opts.strings.length; ++i) {
-    for (let j = 0; j < opts.strings[i].length; ++j) {
-      letters.push(
-        new Letter(
-          opts.strings[i][j],
-          j * opts.charSpacing +
-            opts.charSpacing / 2 -
-            (opts.strings[i].length * opts.charSize) / 2,
-          i * opts.lineHeight +
-            opts.lineHeight / 2 -
-            (opts.strings.length * opts.lineHeight) / 2
-        )
-      );
+  // Add new function to initialize letters
+  function initializeLetters() {
+    for (let i = 0; i < opts.strings.length; ++i) {
+      for (let j = 0; j < opts.strings[i].length; ++j) {
+        letters.push(
+          new Letter(
+            opts.strings[i][j],
+            j * opts.charSpacing +
+              opts.charSpacing / 2 -
+              (opts.strings[i].length * opts.charSize) / 2,
+            i * opts.lineHeight +
+              opts.lineHeight / 2 -
+              (opts.strings.length * opts.lineHeight) / 2
+          )
+        );
+      }
     }
   }
+
+  // Replace original letter initialization with function call
+  initializeLetters();
 
   window.addEventListener('resize', function() {
     w = c.width = window.innerWidth;
